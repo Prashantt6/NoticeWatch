@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
+
+print(settings.DATABASE_URL)
 
 app = FastAPI()
 

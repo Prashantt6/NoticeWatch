@@ -42,10 +42,9 @@ def getNotice():
         
         notices.append (notice)
     return notices
-notices =[]
-notices.append(getNotice())
+# notices =[]
+# notices.append(getNotice())
 
-for notice in notices:
-    print(notice)
-
+# for notice in notices:
+#     print(notice)
 
