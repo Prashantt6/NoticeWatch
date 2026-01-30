@@ -10,7 +10,7 @@ def getNotice():
     table = soup.find("table", id= "datatable") #notice table
 
     rows = table.tbody.find_all("tr") #getting rows of notice table
-
+    notices = []
     for row in rows:
         tds = row.find_all("td") #Extracting all the data from each rows
 
@@ -23,13 +23,24 @@ def getNotice():
         notice_date = tds[2].get_text(strip = True)
         view_link = tds[3].find("a")["href"] #getting the view link of notice   
 
-        print({
+        notice ={
             "sno": sno,
             "title": title,
             "date": notice_date,
             "pdf": pdf_link,
             "view": view_link
-        })
+        }
+        print({
+        "sno": sno,
+        "title": title,
+        "date": notice_date,
+        "pdf": pdf_link,
+        "view": view_link
+         })
+        
+        notices.append (notice)
+        return notices
+notices = getNotice()
 
-
-
+# for notice in notices:
+#     print(notice)
