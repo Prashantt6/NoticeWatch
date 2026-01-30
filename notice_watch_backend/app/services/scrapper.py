@@ -23,24 +23,29 @@ def getNotice():
         notice_date = tds[2].get_text(strip = True)
         view_link = tds[3].find("a")["href"] #getting the view link of notice   
 
+        BASE_URL = "http://exam.ioe.edu.np"   #Used to redirect to original page      
+        # print({
+        # "sno": sno,
+        # "title": title,
+        # "date": notice_date,
+        # "pdf": pdf_link,
+        # "view": view_link
+        #  })
         notice ={
             "sno": sno,
             "title": title,
             "date": notice_date,
-            "pdf": pdf_link,
-            "view": view_link
+            "pdf": BASE_URL + pdf_link,
+            "view": BASE_URL + view_link
         }
-        print({
-        "sno": sno,
-        "title": title,
-        "date": notice_date,
-        "pdf": pdf_link,
-        "view": view_link
-         })
+        
         
         notices.append (notice)
-        return notices
-notices = getNotice()
+    return notices
+notices =[]
+notices.append(getNotice())
 
-# for notice in notices:
-#     print(notice)
+for notice in notices:
+    print(notice)
+
+
