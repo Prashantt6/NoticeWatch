@@ -5,8 +5,8 @@ from app.db.database import SessionLocal
 from app.services.detection import checkChange
 
 def getNotice():
+    print("hi from scrapper")
     db = SessionLocal()
-    print("hi")
     try:
         res = requests.get('http://exam.ioe.edu.np/') # Fetching all the content of websites
         soup = BeautifulSoup(res.content, 'html.parser') #Parsing  the content using html-parser
