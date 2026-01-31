@@ -1,8 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 from app.db.database import SessionLocal
-
 from app.services.detection import checkChange
+from app.services.detection import store_hash_code
+
 
 def getNotice():
     print("hi from scrapper")
@@ -49,7 +50,8 @@ def getNotice():
             is_new =checkChange(db, notice)
             
             if is_new:
-                print("NEW NOTICE:", notice["title"])
+                print("New Notice Detected")
+                store_hash_code(db)
     finally:
         db.close()
         

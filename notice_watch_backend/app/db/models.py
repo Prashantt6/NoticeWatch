@@ -13,3 +13,9 @@ class Notice(Base):
     view_link = Column(String, nullable= True)
 
     content_hash = Column(String, nullable=False, unique=True, index= True)
+    
+class Page_hash(Base):
+    __tablename__ = "pagehash"
+
+    id = Column(Integer, primary_key=True, index=True)
+    page_hash = Column(String,unique= True, index = True )

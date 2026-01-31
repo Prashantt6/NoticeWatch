@@ -1,5 +1,5 @@
 # To get notices from DB to UI
 
-via /api/notices
+via:- /api/notices
 method: get
 
