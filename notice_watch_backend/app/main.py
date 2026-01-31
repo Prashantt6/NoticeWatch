@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-
-print(settings.DATABASE_URL)
+from app.api.notices import router as notice_router
 
 app = FastAPI()
+app.include_router(notice_router)
 
 app.add_middleware(
     CORSMiddleware,

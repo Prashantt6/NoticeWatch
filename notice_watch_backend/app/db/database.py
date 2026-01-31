@@ -10,7 +10,6 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set")
 
-print("DB URL:", DATABASE_URL)
 
 import socket
 socket.setdefaulttimeout(30)
@@ -24,3 +23,10 @@ SessionLocal = sessionmaker(
     bind= engine
 )
 Base = declarative_base()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
