@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+// Source - https://stackoverflow.com/a/67979838
+// Posted by Jigar Fumakiya
+// Retrieved 2026-02-01, License - CC BY-SA 4.0
+
+ <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:label="noticewatch"
         android:name="${applicationName}"

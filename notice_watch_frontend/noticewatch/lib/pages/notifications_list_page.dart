@@ -15,17 +15,20 @@ class _NotificationPageState extends State<NotificationPage> {
   List<Notice>? notices;
 
   Future<void> getNotices() async {
-    Uri endPoint = Uri.parse('http://localhost:8000/api/notices/');
+    Uri endPoint = Uri.parse('https://noticewatch.onrender.com/api/notices/');
 
     Response response = await get(endPoint);
 
-    List<dynamic> data = jsonDecode(response.body).map((e) {
-      return e['title'];
-    }).toList();
+    List<dynamic> data = jsonDecode(response.body);
 
     setState(() {
       notices = data.map((e) {
-        return Notice(title: e);
+        return Notice(
+          title: e['title'],
+          publishedDate: e['published_date'],
+          pdfLink: e['pdf_link'],
+          viewLink: e['view_link'],
+        );
       }).toList();
     });
   }
@@ -40,15 +43,28 @@ class _NotificationPageState extends State<NotificationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text('This is the notifications page')),
+        backgroundColor: Colors.grey[800],
+        title: Center(
+          child: Text(
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 30,
+              color: Colors.amber,
+            ),
+            'Notifications',
+          ),
+        ),
       ),
+      backgroundColor: Colors.grey,
       body: notices == null
           ? Center(child: (CircularProgressIndicator()))
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: notices!.map((data) {
-                return NotificationCard(details: data);
-              }).toList(),
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: notices!.map((data) {
+                  return NotificationCard(details: data);
+                }).toList(),
+              ),
             ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.refresh),

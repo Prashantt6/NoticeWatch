@@ -8,6 +8,27 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(child: Center(child: Text(details.title)));
+    return Card(
+      color: Colors.grey,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(context, '/notice', arguments: details);
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(style: TextStyle(color: Colors.black), details.title),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                style: TextStyle(color: Colors.grey[800]),
+                details.publishedDate,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
