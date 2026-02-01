@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
@@ -18,7 +19,7 @@ app.add_middleware(
 )
 @app.on_event("startup")
 def startup_event():
-    start_scheduler()
+     start_scheduler()
 @app.get("/")
 async def health_check():
     return {"status": "running"}
