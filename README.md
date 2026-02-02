@@ -67,6 +67,7 @@ User Devices
 
 ## 📂 Project Structure (Backend)
 
+```text
 app/ 
 ├── main.py # FastAPI entry point 
 ├── api/ # API routes (read-only)
@@ -77,7 +78,7 @@ app/
 ├── notifier/ # Push notification logic
 ├── db/ # Database models and sessions 
 └── core/ # Config and settings
-
+```
 ---
 
 ## 🔄 How It Works (Flow)
