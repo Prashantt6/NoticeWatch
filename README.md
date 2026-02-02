@@ -73,8 +73,8 @@ app/
 ├── api/ # API routes (read-only)
 ├── scheduler/ # APScheduler setup 
 ├── services/ 
-│├── scrapper.py # Website scraping logic 
-│└── detection.py # Change detection logic 
+│ ├── scrapper.py # Website scraping logic 
+│ └── detection.py # Change detection logic 
 ├── notifier/ # Push notification logic
 ├── db/ # Database models and sessions 
 └── core/ # Config and settings
