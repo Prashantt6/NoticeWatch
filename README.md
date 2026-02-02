@@ -67,17 +67,16 @@ User Devices
 
 ## 📂 Project Structure (Backend)
 
-app/
-├── main.py # FastAPI entry point
+app/ 
+├── main.py # FastAPI entry point 
 ├── api/ # API routes (read-only)
-├── scheduler/ # APScheduler setup
-├── services/
-│ ├── scrapper.py # Website scraping logic
-│ └── detection.py # Change detection logic
+├── scheduler/ # APScheduler setup 
+├── services/ 
+│├── scrapper.py # Website scraping logic 
+│└── detection.py # Change detection logic 
 ├── notifier/ # Push notification logic
-├── db/ # Database models and sessions
+├── db/ # Database models and sessions 
 └── core/ # Config and settings
-
 
 ---
 
