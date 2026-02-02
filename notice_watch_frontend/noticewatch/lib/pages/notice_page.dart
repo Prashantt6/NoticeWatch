@@ -40,7 +40,7 @@ class NoticePage extends StatelessWidget {
                 );
               },
             ),
-            PDF().fromAsset(notice.pdfLink),
+            PDF().cachedFromUrl(notice.pdfLink),
           ],
         ),
       ),

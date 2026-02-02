@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:noticewatch/notification_card.dart';
-import 'package:http/http.dart';
 import 'dart:convert';
 import 'package:noticewatch/notice.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -15,22 +15,25 @@ class _NotificationPageState extends State<NotificationPage> {
   List<Notice>? notices;
 
   Future<void> getNotices() async {
-    Uri endPoint = Uri.parse('https://noticewatch.onrender.com/api/notices/');
+    final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
 
-    Response response = await get(endPoint);
+    final rawData = await asyncPrefs.getString('notices');
+    if (rawData == null) {
+      print('Data Not found');
+    } else {
+      final data = jsonDecode(rawData);
 
-    List<dynamic> data = jsonDecode(response.body);
-
-    setState(() {
-      notices = data.map((e) {
-        return Notice(
-          title: e['title'],
-          publishedDate: e['published_date'],
-          pdfLink: e['pdf_link'],
-          viewLink: e['view_link'],
-        );
-      }).toList();
-    });
+      setState(() {
+        notices = data.map<Notice>((e) {
+          return Notice(
+            title: e['title'],
+            publishedDate: e['published_date'],
+            pdfLink: e['pdf_link'],
+            viewLink: e['view_link'],
+          );
+        }).toList();
+      });
+    }
   }
 
   @override
