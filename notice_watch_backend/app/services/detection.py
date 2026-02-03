@@ -13,10 +13,10 @@ def checkChange(db: Session,notice: dict) -> bool:
     new_notice = Notice(
         title = notice["title"],
         pdf_link= notice["pdf"],
-        view_link= notice["view"],
+        # view_link= notice["view"],
         published_date = notice["date"],
         content_hash = content_hash
-    )
+    )   
 
     try:
         db.add(new_notice)
