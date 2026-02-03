@@ -26,15 +26,18 @@ def getNotice():
             return
         soup = BeautifulSoup(res.content, 'html.parser') #Parsing  the content using html-parser
 
-        notices = soup.find_all("div", class_="detail")
+        notices = soup.find_all("div", class_="recent-post-wrapper shdow")
         for notice in notices:
-            title= notice.find("h5").text.strip()
-            pdf_link = notice.find("a")["href"]
+            dates = soup.find_all("div",class_="date")
+            for date in dates:
+                notice_date= date.find("span", class_="nep_date").text.strip()
+                title= notice.find("h5").text.strip()
+                pdf_link = notice.find("a")["href"]
                 
             print({
             # "sno": sno,
             "title": title,
-            # "date": notice_date,
+            "date": notice_date,
             "pdf": pdf_link,
             # "view": view_link
             
@@ -42,11 +45,11 @@ def getNotice():
             
             
             # Detect change
-            is_new =checkChange(db, notice)
+            # is_new =checkChange(db, notice)
             
-            if is_new:
-                print("New Notice Detected")
-                store_hash_code(db)
+            # if is_new:
+            #     print("New Notice Detected")
+            #     store_hash_code(db)
     except Exception as e:
             print("Scrapping failed", e)
     finally:
