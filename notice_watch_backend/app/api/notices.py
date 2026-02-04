@@ -13,7 +13,6 @@ def fetch_notices_from_db(db:Session):
             "title": notice.title,
             "published_date": notice.published_date,
             "pdf_link": notice.pdf_link,
-            "view_link": notice.view_link,
             "content_hash": notice.content_hash
         }
         for notice in notices
