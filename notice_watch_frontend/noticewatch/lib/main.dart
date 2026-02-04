@@ -3,6 +3,7 @@ import 'package:noticewatch/pages/notifications_list_page.dart';
 import 'package:noticewatch/pages/notice_page.dart';
 import 'package:noticewatch/repository.dart';
 import 'dart:async';
+import 'package:noticewatch/notification_service.dart';
 
 // TODO : Add error handling
 // TODO : Add local notifications
@@ -23,6 +24,8 @@ void pollServer() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  NotificationService().initNotification();
 
   pollServer();
 

@@ -3,6 +3,7 @@ import 'package:noticewatch/notification_card.dart';
 import 'dart:convert';
 import 'package:noticewatch/notice.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:noticewatch/notification_service.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -72,7 +73,7 @@ class _NotificationPageState extends State<NotificationPage> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.refresh),
         onPressed: () {
-          getNotices();
+          NotificationService().showNotification(title: 'Title', body: 'Body');
         },
       ),
     );
