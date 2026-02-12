@@ -19,7 +19,7 @@ def getNotice():
     print("hi from scrapper")
     db = SessionLocal()
     try:
-    
+        awakeRender()
         res = requests.get(URL, headers= HEADERS,verify=False,timeout=10) # Fetching all the content of websites
         if(res.status_code!= 200):
             print("Server error:", res.status_code)
@@ -71,3 +71,10 @@ def getNotice():
 # for notice in notices:
 #     print(notice)
 
+def awakeRender():
+    try:
+        res1 = requests.get("https://noticewatch.onrender.com/api/notices",headers= HEADERS, timeout=10)
+        if(res1.status_code == 200):
+            print("Render awaked")
+    except Exception as e:
+        print("Render down",e)
