@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.sql import func
 from app.db.database import Base
 
 class Notice(Base):
@@ -11,6 +12,7 @@ class Notice(Base):
     published_date= Column(String,index= True)
     pdf_link = Column(String, nullable= True)
     # view_link = Column(String, nullable= True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     content_hash = Column(String, nullable=False, unique=True, index= True)
     

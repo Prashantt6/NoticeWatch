@@ -6,7 +6,7 @@ from app.db.models import Notice
 router = APIRouter()
 
 def fetch_notices_from_db(db:Session):
-    notices = db.query(Notice).all()
+    notices = db.query(Notice).order_by(Notice.created_at.desc()).all()
 
     return [
         {

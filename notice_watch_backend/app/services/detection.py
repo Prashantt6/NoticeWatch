@@ -21,6 +21,7 @@ def checkChange(db: Session,notice: dict) -> bool:
     try:
         db.add(new_notice)
         db.commit()
+        db.refresh(new_notice)
         return True
     except IntegrityError:
         db.rollback()
