@@ -4,7 +4,7 @@ from app.db.database import SessionLocal
 from app.services.detection import checkChange
 from app.services.detection import store_hash_code
 
-URL= 'https://exam.ioe.tu.edu.np/notices?cursor=eyJjcmVhdGVkX2F0IjoiMjAyNi0wMi0wNCAyMDoxNjoyNiIsIl9wb2ludHNUb05leHRJdGVtcyI6ZmFsc2V9' #Notice page url
+URL= 'https://exam.ioe.tu.edu.np/notices' #Notice page url
 # BASE_URL = "http://exam.ioe.edu.np"   #Used to redirect to original page   
 HEADERS = {
      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
