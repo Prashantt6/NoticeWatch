@@ -7,7 +7,6 @@ class NoticeService {
     Uri endPoint = Uri.parse('https://noticewatch.onrender.com/api/notices/');
 
     Response response = await get(endPoint);
-    print('Http request made');
 
     List<dynamic> data = jsonDecode(response.body);
 
