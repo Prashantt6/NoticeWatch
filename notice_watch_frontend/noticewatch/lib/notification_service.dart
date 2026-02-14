@@ -23,7 +23,7 @@ class NotificationService {
     await notificationsPlugin.initialize(settings: initializationSettings);
   }
 
-  NotificationDetails notificationDetails() {
+  NotificationDetails getNotificationDetails() {
     return const NotificationDetails(
       android: AndroidNotificationDetails(
         'update_notification_details',
@@ -44,7 +44,7 @@ class NotificationService {
       id: id,
       title: title,
       body: body,
-      notificationDetails: const NotificationDetails(),
+      notificationDetails: getNotificationDetails(),
     );
   }
 }

@@ -31,15 +31,7 @@ class NoticePage extends StatelessWidget {
                 );
               },
             ),
-            Link(
-              uri: Uri.parse(notice.viewLink),
-              builder: (BuildContext context, FollowLink? followLink) {
-                return InkWell(
-                  onTap: followLink,
-                  child: Text('View Link : ${notice.viewLink}'),
-                );
-              },
-            ),
+
             PDF().cachedFromUrl(notice.pdfLink),
           ],
         ),

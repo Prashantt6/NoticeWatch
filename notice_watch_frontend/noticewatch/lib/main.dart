@@ -18,7 +18,7 @@ final service = NoticeService();
 
 void pollServer() async {
   final data = await service.getData();
-  service.writeData(data);
+  await service.writeData(data);
   Future.delayed(Duration(seconds: 5 * 60), pollServer);
 }
 
