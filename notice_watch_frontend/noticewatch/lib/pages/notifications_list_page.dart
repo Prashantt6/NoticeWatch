@@ -3,6 +3,7 @@ import 'package:noticewatch/notification_card.dart';
 import 'dart:convert';
 import 'package:noticewatch/notice.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:noticewatch/notification_service.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -29,7 +30,6 @@ class _NotificationPageState extends State<NotificationPage> {
             title: e['title'],
             publishedDate: e['published_date'],
             pdfLink: e['pdf_link'],
-            viewLink: e['view_link'],
           );
         }).toList();
       });
@@ -64,15 +64,27 @@ class _NotificationPageState extends State<NotificationPage> {
           : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: notices!.map((data) {
-                  return NotificationCard(details: data);
-                }).toList(),
+                children: [
+                  ...notices!.map((data) {
+                    return NotificationCard(details: data);
+                  }),
+                  TextButton(
+                    onPressed: () {
+                      NotificationService().showNotification(
+                        title: 'New Notice',
+                        body: 'A new notice has been published.',
+                      );
+                    },
+                    child: Text('Show Notification'),
+                  ),
+                ],
               ),
             ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.refresh),
         onPressed: () {
           getNotices();
+          //NotificationService().showNotification(title: 'Title', body: 'Body');
         },
       ),
     );
