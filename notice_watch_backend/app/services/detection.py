@@ -48,6 +48,6 @@ def send_hash_code(db: Session):
     rows = db.query(Notice.content_hash).order_by(Notice.created_at.desc(), Notice.id.desc()).all()
     hashes= [row[0] for row in rows]
 
-    hashed_value = hash_page("".join(hashes))
+    hashed_value = hash_page(hashes)
 
     return hashed_value

@@ -8,7 +8,6 @@ def hash_notice(notice: dict):
 
     return hashlib.sha256(encoded_string).hexdigest()
 
-def hash_page(hash_notice: list[str]) -> str:
-    clean = [str(x) for x in hash_notice]  
-    page_string = json.dumps(clean, sort_keys=True)
-    return hashlib.sha256(page_string.encode()).hexdigest()
+def hash_page(hashes: list[str]) -> str:  
+    concatenated = "|".join(hashes)
+    return hashlib.sha256(concatenated.encode("utf-8")).hexdigest()
