@@ -21,6 +21,7 @@ class _NotificationPageState extends State<NotificationPage> {
     final rawData = await asyncPrefs.getString('notices');
     if (rawData == null) {
       print('Data Not found');
+      
     } else {
       final data = jsonDecode(rawData);
 
