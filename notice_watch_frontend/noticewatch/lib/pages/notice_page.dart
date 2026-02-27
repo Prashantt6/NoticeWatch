@@ -13,26 +13,54 @@ class NoticePage extends StatelessWidget {
     final notice = ModalRoute.of(context)!.settings.arguments as Notice;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey[800],
-        title: Text(style: TextStyle(color: Colors.amber), notice.title),
+        title: Text(
+          notice.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
-      backgroundColor: Colors.grey,
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 16,
+                  color: Colors.amber[300],
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  notice.publishedDate,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             Link(
               uri: Uri.parse(notice.pdfLink),
               builder: (BuildContext context, FollowLink? followLink) {
-                return InkWell(
-                  onTap: followLink,
-                  child: Text('Pdf Link : ${notice.pdfLink}'),
+                return ElevatedButton.icon(
+                  onPressed: followLink,
+                  icon: const Icon(Icons.open_in_new),
+                  label: const Text('Open PDF in browser'),
                 );
               },
             ),
-
-            PDF().cachedFromUrl(notice.pdfLink),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: PDF().cachedFromUrl(
+                  notice.pdfLink,
+                ),
+              ),
+            ),
           ],
         ),
       ),

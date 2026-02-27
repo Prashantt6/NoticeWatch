@@ -20,7 +20,10 @@ class NotificationService {
       android: initSettingsAndroid,
     );
 
-    await notificationsPlugin.initialize(settings: initializationSettings);
+    await notificationsPlugin.initialize(
+      settings: initializationSettings,
+    );
+    _isInitialized = true;
   }
 
   NotificationDetails getNotificationDetails() {
@@ -40,7 +43,7 @@ class NotificationService {
     String? title,
     String? body,
   }) async {
-    return notificationsPlugin.show(
+    await notificationsPlugin.show(
       id: id,
       title: title,
       body: body,
