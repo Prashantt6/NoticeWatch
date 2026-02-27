@@ -1,18 +1,18 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+
 from app.db.database import get_db
-from app.db.models import Page_hash
+from app.services.detection import send_hash_code
 
 
 router = APIRouter()
 
-def get_page_hash(db: Session):
-    page= db.query(Page_hash.page_hash).first()
-    return page.page_hash if page else None
 
 @router.get("/")
-def get_change(db: Session= Depends(get_db)):
-    return {
-        get_page_hash(db)
-    }
+def get_change(db: Session = Depends(get_db)) -> str:
+    """
+    Return the current page hash calculated from all notices.
+    This is recomputed on every call so any insert/update/delete
+    in the notices table changes the returned hash.
+    """
+    return send_hash_code(db)
