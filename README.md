@@ -1,100 +1,104 @@
 # NoticeWatch
-NoticeWatch is a backend-driven notification system that automatically monitors the IOE examination website for new notices and notifies users in real time via push notifications. The system is designed to be efficient, fault-tolerant, and suitable for low-frequency but important updates such as college notices.
+NoticeWatch is a FastAPI + Flutter based notification system that automatically monitors the IOE examination website for new notices and notifies users using **hash-based change detection**. The backend scrapes and stores notices, exposes simple REST APIs, and the Flutter app polls those APIs and shows local notifications when new notices are detected.
 
 ---
 
-## ✨ Features
+##  Features
 
-- 🔍 Periodically scrapes the IOE notice website (every 10 minutes)
-- 🧠 Detects newly published notices using change-detection logic
-- 💾 Stores notices persistently in a database
-- 🔔 Sends push notifications when a new notice is detected
-- 📱 Flutter frontend fetches notices via clean REST APIs
-- 💤 Gracefully handles website downtime or server sleep (free hosting)
-- ⚙️ Fully automated — no user-triggered scraping
+-  Periodically scrapes the IOE notice website
+-  Detects newly published notices using hash‑based change detection
+-  Stores notices persistently in a database
+-  Notifies users when a new notice is detected (local notifications on device)
+-  Flutter frontend fetches notices via clean REST APIs
+-  Hash comparison between backend and frontend for reliable change detection
+-  Gracefully handles website downtime or server sleep (free hosting)
+-  Fully automated fetching — no manual scraping required
 
 ---
 
-## 🏗️ System Architecture
+##  System Architecture
 
-APScheduler (every 10 minutes)
+Scraper / Detection (backend)
 ↓
-Scraper
+Database (notices + content hashes)
 ↓
-Change Detection
+Page‑hash computation (`/api/notifier/`)
 ↓
-Database
+REST API (`/api/notices/`)
 ↓
-Notifier 
-↓
-User Devices
+Flutter App (hash comparison + local notifications)
 
 
-- **Scheduler** decides *when* scraping happens  
-- **Scraper** collects notice data from the website  
-- **Change Detection** checks whether a notice is new  
+- **Scraper** collects notice data from the IOE website  
+- **Change Detection** stores new notices and their `content_hash` in the DB  
+- **Page hash** combines all `content_hash` values into a single SHA‑256 page hash  
 - **Database** acts as the single source of truth  
-- **Notifier** sends push notifications for new notices  
-- **API** serves stored notices to the frontend  
+- **API** serves both notices and the current page hash to the frontend  
+- **Flutter app** compares its stored page hash to the backend page hash to decide when to fetch and notify  
 
 ---
 
-## 🧠 Design Principles
+##  Design Principles
 
-- **Server-side monitoring** (no client-side polling)
+- **Hash-based change detection** (compare hashes, not whole payloads)
+- **Lightweight client polling** (minimal, hash-first checks from the app)
 - **Event-driven notifications** (notify only on real changes)
 - **Fail-safe scraping** (website downtime does not crash the backend)
 - **Thin frontend, smart backend**
-- **Separation of concerns** between scheduler, scraper, API, and notifier
+- **Separation of concerns** between scraper, detection, API, notifier, and Flutter app
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Backend
 - FastAPI
-- APScheduler (background scheduling)
 - Requests + BeautifulSoup (web scraping)
 - SQLite / PostgreSQL (database)
-- Firebase Cloud Messaging (push notifications)
+- Custom hash‑based notifier (`/api/notifier/`)
 
 ### Frontend
 - Flutter
 - REST API integration
-- FCM for notifications
+- `flutter_local_notifications` for on‑device notifications
 
 ---
 
-## 📂 Project Structure (Backend)
+##  Project Structure (Backend)
 
 ```text
-app/ 
-├── main.py # FastAPI entry point 
-├── api/ # API routes (read-only)
-├── scheduler/ # APScheduler setup 
-├── services/ 
-│ ├── scrapper.py # Website scraping logic 
-│ └── detection.py # Change detection logic 
-├── notifier/ # Push notification logic
-├── db/ # Database models and sessions 
-└── core/ # Config and settings
+app/
+├── main.py          # FastAPI entry point
+├── api/
+│   └── notices.py   # /api/notices/ - list notices
+├── notifier/
+│   └── new_notice_notifier.py  # /api/notifier/ - current page hash
+├── services/
+│   ├── scrapper.py  # Website scraping logic
+│   └── detection.py # Change detection + hash storage
+├── db/
+│   ├── models.py    # Notice + Page_hash models
+│   └── database.py  # DB session / engine
+└── core/
+    └── security.py  # hash_notice / hash_page helpers
 ```
 ---
 
-## 🔄 How It Works (Flow)
+##  How It Works (Flow)
 
-1. Backend starts and initializes APScheduler
-2. Every 10 minutes, the scheduler triggers the scraper
-3. Scraper fetches and parses the notice table
-4. Each notice is checked against stored data
-5. If a new notice is found:
-   - It is saved to the database
-   - A push notification is sent to users
-6. Flutter app fetches notices via API and displays them
+1. Backend scraper periodically reads the IOE notices page.
+2. Each scraped notice is checked; new ones are inserted into the `notices` table with a unique `content_hash`.
+3. The backend exposes:
+   - `GET /api/notices/` → ordered list of notices with `title`, `published_date`, `pdf_link`, `content_hash`.
+   - `GET /api/notifier/` → a single SHA‑256 **page hash** computed from all `content_hash` values.
+4. The Flutter app:
+   - Computes and stores its own page hash from the `/api/notices/` response.
+   - Polls `/api/notifier/` in background (via Workmanager) and foreground (1‑minute timer + pull‑to‑refresh).
+   - If the backend page hash differs from its stored hash, it fetches `/api/notices/`, recomputes the hash, updates local cache, and shows a local notification.
 
 ---
 
-## 🛡️ Failure Handling
+##  Failure Handling
 
 - If the IOE website is down or unreachable:
   - The scraper exits gracefully
@@ -105,7 +109,7 @@ app/
 
 ---
 
-## 🚀 Deployment
+##  Deployment
 
 - Designed to run on free hosting platforms (Render)
 - Backend may sleep during inactivity on free tier
@@ -114,7 +118,7 @@ app/
 
 ---
 
-## 📌 Future Improvements
+##  Future Improvements
 
 - Admin dashboard for monitoring scraper status
 - Better logging and alerting
@@ -124,13 +128,13 @@ app/
 
 ---
 
-## 📄 License
+## License
 
 This project is for educational and personal use.
 
 ---
 
-## 🙌 Acknowledgements
+##  Acknowledgements
 
 Built as a learning project to understand:
 - Backend system design
