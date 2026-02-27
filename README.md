@@ -17,6 +17,7 @@ NoticeWatch is a FastAPI + Flutter based notification system that automatically 
 ---
 
 ##  System Architecture
+``` text
 
 Scraper / Detection (backend)
 ↓
@@ -27,7 +28,7 @@ Page‑hash computation (`/api/notifier/`)
 REST API (`/api/notices/`)
 ↓
 Flutter App (hash comparison + local notifications)
-
+```
 
 - **Scraper** collects notice data from the IOE website  
 - **Change Detection** stores new notices and their `content_hash` in the DB  
