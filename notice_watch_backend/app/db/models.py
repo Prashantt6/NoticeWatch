@@ -21,3 +21,4 @@ class Page_hash(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     page_hash = Column(String,unique= True, index = True )
+

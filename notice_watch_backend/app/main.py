@@ -5,6 +5,7 @@ from app.core.config import settings
 from app.api.notices import router as notice_router
 from app.notifier.new_notice_notifier import router as notfier_router
 from app.scheduler.notice_scheduler import start_scheduler
+from app.firebase.firebase import *
 
 app = FastAPI()
 app.include_router(notice_router, prefix ="/api/notices", tags=["Notices"])
