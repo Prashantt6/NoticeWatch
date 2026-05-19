@@ -1,7 +1,7 @@
+import os
+import socket
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from app.core.config import settings
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,18 +11,14 @@ if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set")
 
 
-import socket
 socket.setdefaulttimeout(30)
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
 )
-SessionLocal = sessionmaker(
-    autocommit= False,
-    autoflush= False,
-    bind= engine
-)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
 
 def get_db():
     db = SessionLocal()
