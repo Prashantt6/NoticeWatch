@@ -10,8 +10,12 @@ on:
       - main
 
 jobs:
-  quality-checks:
+  backend-checks:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: notice_watch_backend
 
     steps:
       - name: Checkout code
