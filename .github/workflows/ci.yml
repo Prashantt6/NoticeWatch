@@ -15,7 +15,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: notice_watch_backend
+        working-directory: ./notice_watch_backend
 
     steps:
       - name: Checkout code
