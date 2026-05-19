@@ -7,16 +7,16 @@ from app.core.security import hash_page
 from app.core.security import hash_notice
 
 
-def checkChange(db: Session,notice: dict) -> bool:
+def checkChange(db: Session, notice: dict) -> bool:
     content_hash = hash_notice(notice)
 
     new_notice = Notice(
-        title = notice["title"],
-        pdf_link= notice["pdf"],
+        title=notice["title"],
+        pdf_link=notice["pdf"],
         # view_link= notice["view"],
-        published_date = notice["date"],
-        content_hash = content_hash
-    )   
+        published_date=notice["date"],
+        content_hash=content_hash,
+    )
 
     try:
         db.add(new_notice)
@@ -27,13 +27,14 @@ def checkChange(db: Session,notice: dict) -> bool:
         db.rollback()
         return False
 
+
 def store_hash_code(db: Session):
     hashed_value = send_hash_code(db)
     try:
         page = db.query(Page_hash).first()
 
         if page is None:
-            page= Page_hash(page_hash = hashed_value)
+            page = Page_hash(page_hash=hashed_value)
             db.add(page)
 
         else:
@@ -45,8 +46,12 @@ def store_hash_code(db: Session):
 
 
 def send_hash_code(db: Session):
-    rows = db.query(Notice.content_hash).order_by(Notice.created_at.desc(), Notice.id.desc()).all()
-    hashes= [row[0] for row in rows]
+    rows = (
+        db.query(Notice.content_hash)
+        .order_by(Notice.created_at.desc(), Notice.id.desc())
+        .all()
+    )
+    hashes = [row[0] for row in rows]
 
     hashed_value = hash_page(hashes)
 

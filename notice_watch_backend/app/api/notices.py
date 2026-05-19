@@ -5,7 +5,8 @@ from app.db.models import Notice
 
 router = APIRouter()
 
-def fetch_notices_from_db(db:Session):
+
+def fetch_notices_from_db(db: Session):
     notices = db.query(Notice).order_by(Notice.created_at.desc()).all()
 
     return [
@@ -13,10 +14,11 @@ def fetch_notices_from_db(db:Session):
             "title": notice.title,
             "published_date": notice.published_date,
             "pdf_link": notice.pdf_link,
-            "content_hash": notice.content_hash
+            "content_hash": notice.content_hash,
         }
         for notice in notices
     ]
+
 
 @router.get("/")
 def get_notices(db: Session = Depends(get_db)):

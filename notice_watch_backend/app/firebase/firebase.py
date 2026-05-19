@@ -1,13 +1,15 @@
+import json
 import firebase_admin
 from firebase_admin import credentials
-from pathlib import Path
+from app.core.config import settings
 
-BASE_DIR = Path(__file__).resolve().parent
 
-cred = credentials.Certificate(
-    BASE_DIR / "serviceAccountKey.json"
-)
+def initialize_firebase():
+    if not firebase_admin._apps:
+        cred_dict = json.loads(settings.FIREBASE_CREDENTIALS)
 
-app = firebase_admin.initialize_app(cred)
+        cred = credentials.Certificate(cred_dict)
 
-print("Firebase initialized")
+        firebase_admin.initialize_app(cred)
+
+    print("Firebase initialized")
