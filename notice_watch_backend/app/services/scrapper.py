@@ -57,7 +57,7 @@ def getNotice():
                 is_new = checkChange(db, notice_data)
 
                 if is_new:
-                    print("New Notice Detected")
+                    print("New Notice Detected", notice_data["title"])
 
                     send_notification(db, notice_data["title"])
 
