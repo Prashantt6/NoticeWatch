@@ -6,7 +6,6 @@ from app.api.devicetokens import router as device_token_router
 from app.scheduler.notice_scheduler import start_scheduler
 from app.firebase.firebase import initialize_firebase
 from app.db.database import Base, engine
-import app.db.models
 
 app = FastAPI()
 app.include_router(notice_router, prefix="/api/notices", tags=["Notices"])
