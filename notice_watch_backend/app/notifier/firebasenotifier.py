@@ -14,8 +14,8 @@ def send_notification(db, title: str, body: str | None = None):
         try:
             message = messaging.Message(
                 data={
-                    "title": title,
-                    "body": body or "",
+                    "title": "New Notice Published",
+                    "body": title or "",
                 },
                 android=messaging.AndroidConfig(
                     priority="high",
