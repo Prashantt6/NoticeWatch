@@ -63,12 +63,14 @@ class NotificationService {
 
     FirebaseMessaging.onMessage.listen((
       RemoteMessage message,
-    ){
-
-      showNotification(
+    )
+    {
+      if(message.notification != null){
+        showNotification(
         title: message.notification?.title,
         body: message.notification?.body,
       );
+      }
     });
   }
 

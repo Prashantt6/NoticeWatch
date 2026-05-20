@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:noticewatch/notification_card.dart';
-import 'dart:async';
-import 'dart:convert';
 import 'package:noticewatch/notice.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:noticewatch/notification_service.dart';
 import 'package:noticewatch/repository.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -19,8 +15,6 @@ class _NotificationPageState extends State<NotificationPage> {
   bool _isLoading = false;
   String? _error;
   final NoticeService _service = NoticeService();
-  Timer? _pollTimer;
-
   Future<void> getNotices() async {
     setState(() {
       _isLoading = true;
@@ -28,98 +22,19 @@ class _NotificationPageState extends State<NotificationPage> {
     });
 
     try {
-      final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
 
-      // Frontend-stored hash
-      final String? storedHash = await asyncPrefs.getString('hash');
-
-      // Backend-reported hash
-      final String backendHash = await _service.getHash();
-
-      if (backendHash.trim().isEmpty) {
-        // Backend error, just show cached data if available
-        final String? rawData = await asyncPrefs.getString('notices');
-        if (rawData != null) {
-          final data = jsonDecode(rawData);
-          setState(() {
-            notices = (data as List).map<Notice>((e) {
-              return Notice(
-                title: e['title'],
-                publishedDate: e['published_date'],
-                pdfLink: e['pdf_link'],
-              );
-            }).toList();
-            _isLoading = false;
-            _error = 'Unable to check for new notices right now.';
-          });
-        } else {
-          setState(() {
-            notices = [];
-            _isLoading = false;
-            _error = 'Unable to load notices right now.';
-          });
-        }
-        return;
-      }
-
-      if (storedHash != null && backendHash == storedHash) {
-        // No new data, just load from cache if possible
-        final String? rawData = await asyncPrefs.getString('notices');
-        if (rawData != null) {
-          final data = jsonDecode(rawData);
-          setState(() {
-            notices = (data as List).map<Notice>((e) {
-              return Notice(
-                title: e['title'],
-                publishedDate: e['published_date'],
-                pdfLink: e['pdf_link'],
-              );
-            }).toList();
-            _isLoading = false;
-          });
-        } else {
-          setState(() {
-            notices = [];
-            _isLoading = false;
-            _error = 'No notices available yet.';
-          });
-        }
-        return;
-      }
 
       // Hash differs or no stored hash -> fetch notices
       final remote = await _service.getData();
-      if (remote.isEmpty) {
-        setState(() {
-          notices = [];
-          _isLoading = false;
-          _error = 'No notices available yet.';
-        });
-        return;
-      }
-
-      // Compute and persist frontend hash & data
-      final String newFrontendHash = _service.computePageHash(remote);
-      await _service.writeData(remote);
-      await _service.writeHash(newFrontendHash);
-
-      // Show notification only if we've seen data before
-      if (storedHash != null) {
-        await NotificationService().showNotification(
-          title: 'New Notice',
-          body: 'A new notice has been published.',
-        );
-      }
 
       setState(() {
-        notices = remote.map<Notice>((e) {
-          return Notice(
-            title: e['title'],
-            publishedDate: e['published_date'],
+        notices = remote.map<Notice>((e){
+          return Notice(title: e['title'],
+           publishedDate: e['published_date'],
             pdfLink: e['pdf_link'],
-          );
+            );
         }).toList();
-        _isLoading = false;
+        _isLoading= false;
       });
     } catch (e) {
       setState(() {
@@ -132,18 +47,10 @@ class _NotificationPageState extends State<NotificationPage> {
 
   @override
   void initState() {
-    super.initState();
-    getNotices();
-    _pollTimer = Timer.periodic(
-      const Duration(minutes: 1),
-      (_) => getNotices(),
-    );
-  }
 
-  @override
-  void dispose() {
-    _pollTimer?.cancel();
-    super.dispose();
+    super.initState();
+
+    getNotices();
   }
 
   @override
