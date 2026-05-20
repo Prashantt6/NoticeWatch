@@ -12,17 +12,14 @@ def send_notification(db, title: str, body: str | None = None):
 
     for device in tokens:
         try:
+            
             message = messaging.Message(
-                notification=messaging.Notification(
-                    title=title,
-                    body=body,
-                ),
+                data={
+                    "title": title,
+                    "body": body or "",
+                },
                 android=messaging.AndroidConfig(
                     priority="high",
-                    notification=messaging.AndroidNotification(
-                        channel_id="notice_watch_channel",
-                        sound="default",
-                    ),
                 ),
                 token=device.token,
             )

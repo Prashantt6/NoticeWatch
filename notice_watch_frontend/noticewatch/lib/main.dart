@@ -22,9 +22,13 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await notificationService.initNotification();
 
   final notification = message.notification;
+  final title =
+      message.data['title'] ?? notification?.title ?? 'NoticeWatch';
+  final body =
+      message.data['body'] ?? notification?.body ?? '';
   await notificationService.showNotification(
-    title: notification?.title ?? 'NoticeWatch',
-    body: notification?.body ?? '',
+    title: title,
+    body: body,
   );
 }
 

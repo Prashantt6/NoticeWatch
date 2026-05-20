@@ -95,11 +95,16 @@ class NotificationService {
       RemoteMessage message,
     )
     {
-      if (message.notification != null) {
+      final title =
+          message.data['title'] ?? message.notification?.title;
+      final body =
+          message.data['body'] ?? message.notification?.body;
+      if ((title != null && title.toString().isNotEmpty) ||
+          (body != null && body.toString().isNotEmpty)) {
         showNotification(
-        title: message.notification?.title,
-        body: message.notification?.body,
-      );
+          title: title?.toString(),
+          body: body?.toString(),
+        );
       }
     });
   }
@@ -115,6 +120,8 @@ class NotificationService {
         priority: Priority.high,
         playSound: true,
         enableVibration: true,
+        category: AndroidNotificationCategory.message,
+        visibility: NotificationVisibility.public,
 
         ticker: 'ticker',
         icon: 'ic_notification',
