@@ -1,16 +1,22 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Deployed backend base URL (no trailing slash!)
-const String kApiBaseUrl = 'https://noticewatch.onrender.com';
+String get _baseUrl {
+  final value = dotenv.env['BaseUrl'];
+  if (value == null || value.isEmpty) {
+    throw StateError('BaseUrl is not configured in .env');
+  }
+  return value;
+}
 
 class NoticeService {
   // Fetch notices from backend
   Future<List<dynamic>> getData() async {
-    final Uri endPoint = Uri.parse('$kApiBaseUrl/api/notices/');
+    final Uri endPoint = Uri.parse('$_baseUrl/api/notices/');
 
     final Response response = await get(endPoint);
 
@@ -56,7 +62,7 @@ class NoticeService {
 
   // Get hash from backend (supports both ["hash"] and "hash" formats)
   Future<String> getHash() async {
-    final Uri endPoint = Uri.parse('$kApiBaseUrl/api/notifier/');
+    final Uri endPoint = Uri.parse('$_baseUrl/api/notifier/');
 
     final Response response = await get(endPoint);
 

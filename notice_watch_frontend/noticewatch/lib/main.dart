@@ -1,19 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:noticewatch/pages/notifications_list_page.dart';
 import 'package:noticewatch/pages/notice_page.dart';
-import 'package:noticewatch/repository.dart';
 import 'package:noticewatch/notification_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:workmanager/workmanager.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-@pragma('vm:entry-point')
-void callBackDispatcher() async {
-  Workmanager().executeTask((task, inputData) async {
-    await pollServer();
-    print('Ran dispatcher');
-    return Future.value(true);
-  });
-}
 
 Map<String, WidgetBuilder> routes = {
   '/notice': (context) {
@@ -21,64 +12,18 @@ Map<String, WidgetBuilder> routes = {
   },
 };
 
-final service = NoticeService();
-
-Future<void> pollServer() async {
-  final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
-  final String? storedHash = await asyncPrefs.getString('hash');
-
-  // Hash reported by backend
-  final String backendHash = await service.getHash();
-
-  if (backendHash.trim().isEmpty) {
-    print('Error fetching hash from server');
-    return;
-  }
-
-  if (storedHash != null && backendHash == storedHash) {
-    print('No new data');
-    return;
-  }
-
-  // Backend hash differs from what frontend has stored -> fetch notices
-  final data = await service.getData();
-  if (data.isEmpty) {
-    print('No notices data from server');
-    return;
-  }
-
-  // Compute frontend hash from notices and persist
-  final String newFrontendHash = service.computePageHash(data);
-  await service.writeData(data);
-  await service.writeHash(newFrontendHash);
-
-  // Only show notification if this isn't the very first hash we ever stored
-  if (storedHash != null) {
-    await NotificationService().showNotification(
-      title: 'New Notice',
-      body: 'A new notice has been published.',
-    );
-  }
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await NotificationService().initNotification();
+  await dotenv.load(fileName: '.env');
+  await Firebase.initializeApp();
+  final notificationservice = 
+        NotificationService();
 
-  await pollServer();
+  await notificationservice.initNotification();
+  await notificationservice.initializeFCM();
 
-  await Workmanager().initialize(
-    callBackDispatcher,
-    isInDebugMode: false,
-  );
 
-  Workmanager().registerPeriodicTask(
-    'pollServer',
-    'pollServer',
-    frequency: const Duration(minutes: 15),
-    constraints: Constraints(networkType: NetworkType.connected),
-  );
 
   runApp(
     MaterialApp(

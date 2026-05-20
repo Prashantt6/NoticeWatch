@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "114400458505",
+    "project_id": "noticewatch-ebab9",
+    "storage_bucket": "noticewatch-ebab9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:114400458505:android:63945968e1fa600a96c5d8",
+        "android_client_info": {
+          "package_name": "com.example.noticewatch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOBmgufkgSMR241Ougj5idSeYT2z2FgQA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
