@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,15 +12,16 @@ String get _baseUrl {
   return value;
 }
 
+/// Persisted JSON list from `/api/notices/` (same shape as API).
+const String _noticesCacheKey = 'notices_cache_v1';
+
 class NoticeService {
-  // Fetch notices from backend
   Future<List<dynamic>> getData() async {
     final Uri endPoint = Uri.parse('$_baseUrl/api/notices/');
 
     final Response response = await get(endPoint);
 
     if (response.statusCode != 200) {
-      print('Failed to load notices: ${response.statusCode}');
       return [];
     }
 
@@ -39,63 +39,26 @@ class NoticeService {
     return [];
   }
 
-  // Save notices locally (matches NotificationPage reader)
-  Future<void> writeData(List<dynamic> data) async {
-    final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
-    await asyncPrefs.setString('notices', jsonEncode(data));
+  /// True after we have ever saved a cache (including empty list `[]`).
+  Future<bool> hasNoticesCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey(_noticesCacheKey);
   }
 
-  // Compute page hash on frontend from notices list
-  String computePageHash(List<dynamic> notices) {
-    final hashes = notices
-        .map((e) => e['content_hash']?.toString())
-        .where((h) => h != null && h.isNotEmpty)
-        .cast<String>()
-        .toList();
-
-    if (hashes.isEmpty) return '';
-
-    final concatenated = hashes.join('|');
-    final digest = sha256.convert(utf8.encode(concatenated));
-    return digest.toString();
-  }
-
-  // Get hash from backend (supports both ["hash"] and "hash" formats)
-  Future<String> getHash() async {
-    final Uri endPoint = Uri.parse('$_baseUrl/api/notifier/');
-
-    final Response response = await get(endPoint);
-
-    if (response.statusCode != 200) {
-      print('Failed to load hash: ${response.statusCode}');
-      return '';
-    }
-
-    final body = response.body;
+  /// Returns decoded list or `null` if missing / invalid.
+  Future<List<dynamic>?> loadCachedNotices() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_noticesCacheKey);
+    if (raw == null || raw.isEmpty) return null;
     try {
-      final decoded = jsonDecode(body);
-      if (decoded is String) {
-        return decoded;
-      }
-      if (decoded is List && decoded.isNotEmpty) {
-        final first = decoded.first;
-        if (first is String) return first;
-      }
-      if (decoded is Map<String, dynamic>) {
-        final value = decoded['hash'] ?? decoded['page_hash'];
-        if (value is String) return value;
-      }
-    } catch (_) {
-      // Not JSON, assume raw hash string
-      return body.trim();
-    }
-
-    return '';
+      final decoded = jsonDecode(raw);
+      if (decoded is List) return decoded;
+    } catch (_) {}
+    return null;
   }
 
-  // Save hash locally (frontend-computed hash)
-  Future<void> writeHash(String hash) async {
-    final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
-    await asyncPrefs.setString('hash', hash);
+  Future<void> saveNoticesCache(List<dynamic> data) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_noticesCacheKey, jsonEncode(data));
   }
 }

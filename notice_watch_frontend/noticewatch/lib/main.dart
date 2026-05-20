@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:noticewatch/pages/notifications_list_page.dart';
 import 'package:noticewatch/pages/notice_page.dart';
 import 'package:noticewatch/notification_service.dart';
+import 'package:noticewatch/repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -30,6 +31,12 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     title: title,
     body: body,
   );
+
+  try {
+    final service = NoticeService();
+    final remote = await service.getData();
+    await service.saveNoticesCache(remote);
+  } catch (_) {}
 }
 
 void main() async {
@@ -61,8 +68,10 @@ void main() async {
         scaffoldBackgroundColor: const Color(0xFF0F172A),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
-          backgroundColor: Colors.transparent,
+          backgroundColor: Color(0xFF0F172A),
+          surfaceTintColor: Colors.transparent,
           elevation: 0,
+          scrolledUnderElevation: 0,
         ),
         cardTheme: const CardThemeData(
           color: Color(0xFF1E293B),
