@@ -18,6 +18,11 @@ class NotificationService {
   final FirebaseMessaging _firebaseMessaging =
     FirebaseMessaging.instance;
 
+  static const String androidChannelId = 'notice_watch_channel';
+  static const String androidChannelName = 'NoticeWatch Notifications';
+  static const String androidChannelDescription =
+      'Notification channel for NoticeWatch';
+
   bool _isInitialized = false;
 
   bool get isInitialized => _isInitialized;
@@ -30,7 +35,7 @@ class NotificationService {
     
     const initSettingsAndroid=
         AndroidInitializationSettings(
-          '@mipmap/ic_launcher',
+          'ic_notification',
         );
 
     const initializationSettings = 
@@ -41,6 +46,22 @@ class NotificationService {
     await notificationsPlugin.initialize(
       initializationSettings,
     );
+
+    final androidPlugin =
+        notificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+    if (androidPlugin != null) {
+      const channel = AndroidNotificationChannel(
+        androidChannelId,
+        androidChannelName,
+        description: androidChannelDescription,
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+        showBadge: true,
+      );
+      await androidPlugin.createNotificationChannel(channel);
+    }
 
     _isInitialized = true;
   }
@@ -74,7 +95,7 @@ class NotificationService {
       RemoteMessage message,
     )
     {
-      if(message.notification != null){
+      if (message.notification != null) {
         showNotification(
         title: message.notification?.title,
         body: message.notification?.body,
@@ -86,11 +107,17 @@ class NotificationService {
   NotificationDetails getNotificationDetails() {
     return const NotificationDetails(
       android: AndroidNotificationDetails(
-        'update_notification_details',
-        'Update Notification',
-        channelDescription: 'Update Notification Channel',
+        androidChannelId,
+
+        androidChannelName,
+        channelDescription: androidChannelDescription,
         importance: Importance.max,
         priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
+
+        ticker: 'ticker',
+        icon: 'ic_notification',
       ),
     );
   }

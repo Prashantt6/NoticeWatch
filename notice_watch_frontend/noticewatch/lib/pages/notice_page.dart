@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:noticewatch/notice.dart';
 import 'package:url_launcher/link.dart';
-import 'package:flutter_cached_pdfview/flutter_cached_pdfview.dart';
-
-// TODO : fix the pdf view , for now it only works on android and ios
 
 class NoticePage extends StatelessWidget {
   const NoticePage({super.key});
@@ -24,6 +21,14 @@ class NoticePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              notice.title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 10),
             Row(
               children: [
                 Icon(
@@ -41,7 +46,7 @@ class NoticePage extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             Link(
               uri: Uri.parse(notice.pdfLink),
               builder: (BuildContext context, FollowLink? followLink) {
@@ -51,15 +56,6 @@ class NoticePage extends StatelessWidget {
                   label: const Text('Open PDF in browser'),
                 );
               },
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: PDF().cachedFromUrl(
-                  notice.pdfLink,
-                ),
-              ),
             ),
           ],
         ),

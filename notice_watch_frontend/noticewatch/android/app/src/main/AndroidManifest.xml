@@ -1,14 +1,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-// Source - https://stackoverflow.com/a/67979838
-// Posted by Jigar Fumakiya
-// Retrieved 2026-02-01, License - CC BY-SA 4.0
+    <!-- Source - https://stackoverflow.com/a/67979838
+         Posted by Jigar Fumakiya
+         Retrieved 2026-02-01, License - CC BY-SA 4.0 -->
 
  <uses-permission android:name="android.permission.INTERNET" />
+ <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
-        android:label="noticewatch"
+        android:label="NoticeWatch"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="notice_watch_channel" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -48,6 +56,4 @@
             <data android:mimeType="text/plain"/>
         </intent>
     </queries>
-    <uses-permission
-        android:name="android.permission.POST_NOTIFICATIONS"/>
 </manifest>

@@ -4,6 +4,7 @@ import 'package:noticewatch/pages/notifications_list_page.dart';
 import 'package:noticewatch/pages/notice_page.dart';
 import 'package:noticewatch/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 
 Map<String, WidgetBuilder> routes = {
@@ -12,11 +13,28 @@ Map<String, WidgetBuilder> routes = {
   },
 };
 
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
+  final notificationService = NotificationService();
+  await notificationService.initNotification();
+
+  final notification = message.notification;
+  await notificationService.showNotification(
+    title: notification?.title ?? 'NoticeWatch',
+    body: notification?.body ?? '',
+  );
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: '.env');
   await Firebase.initializeApp();
+
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   final notificationservice = 
         NotificationService();
 

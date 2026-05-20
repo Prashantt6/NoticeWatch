@@ -2,7 +2,7 @@ from app.db.models import DeviceToken
 from firebase_admin import messaging
 
 
-def send_notification(db, title: str):
+def send_notification(db, title: str, body: str | None = None):
 
     tokens = db.query(DeviceToken).all()
 
@@ -15,6 +15,14 @@ def send_notification(db, title: str):
             message = messaging.Message(
                 notification=messaging.Notification(
                     title=title,
+                    body=body,
+                ),
+                android=messaging.AndroidConfig(
+                    priority="high",
+                    notification=messaging.AndroidNotification(
+                        channel_id="notice_watch_channel",
+                        sound="default",
+                    ),
                 ),
                 token=device.token,
             )
