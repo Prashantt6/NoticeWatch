@@ -1,5 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'dart:convert';
+import 'package:http/http.dart'as http;
 
 class NotificationService {
   final notificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -52,6 +54,13 @@ class NotificationService {
     print("FCM TOKEN:");
     print(token);
 
+    if (token!=null){
+
+      await sendTokenBackend(
+        token,
+      );
+    }
+
     FirebaseMessaging.onMessage.listen((
       RemoteMessage message,
     ){
@@ -86,5 +95,32 @@ class NotificationService {
       body,
       getNotificationDetails(),
     );
+  }
+
+  Future<void> sendTokenBackend(
+    String token,
+  )async{
+    try{
+
+      final response  = await http.post(
+        Uri.parse('http://10.0.2.2:8000/api/device/token',),
+
+        headers: {
+          'Content-Type':
+              'application/json'
+        },
+        body: jsonEncode({
+          'token': token
+        }),
+      );
+    print(
+      'Backend response: '
+      '${response.body}'
+    );
+    }catch (e){
+      print(
+        'Failed to send token: $e'
+      );
+    }
   }
 }
