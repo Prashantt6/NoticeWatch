@@ -12,7 +12,6 @@ def send_notification(db, title: str, body: str | None = None):
 
     for device in tokens:
         try:
-            
             message = messaging.Message(
                 data={
                     "title": title,
