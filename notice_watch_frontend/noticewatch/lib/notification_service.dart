@@ -86,11 +86,17 @@ class NotificationService {
   NotificationDetails getNotificationDetails() {
     return const NotificationDetails(
       android: AndroidNotificationDetails(
-        'update_notification_details',
-        'Update Notification',
-        channelDescription: 'Update Notification Channel',
+        'notice_watch_channel',
+
+        'NoticeWatch Notifications',
+        channelDescription: 'Notification channel for NoticeWatch',
         importance: Importance.max,
         priority: Priority.high,
+        playSound: true,
+        enableVibration: true,
+
+        ticker: 'ticker',
+        icon: '@mipmap/ic_launcher',
       ),
     );
   }
