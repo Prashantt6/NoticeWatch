@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:noticewatch/pages/notifications_list_page.dart';
 import 'package:noticewatch/pages/notice_page.dart';
 import 'package:noticewatch/notification_service.dart';
@@ -14,6 +15,7 @@ Map<String, WidgetBuilder> routes = {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load(fileName: '.env');
   await Firebase.initializeApp();
   final notificationservice = 
         NotificationService();

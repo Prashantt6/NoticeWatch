@@ -1,7 +1,16 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart'as http;
+
+String get _baseUrl {
+  final value = dotenv.env['BaseUrl'];
+  if (value == null || value.isEmpty) {
+    throw StateError('BaseUrl is not configured in .env');
+  }
+  return value;
+}
 
 class NotificationService {
   final notificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -105,7 +114,7 @@ class NotificationService {
     try{
 
       final response  = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/device/token',),
+        Uri.parse('$_baseUrl/api/device/token',),
 
         headers: {
           'Content-Type':
