@@ -21,7 +21,7 @@ def start_scheduler():
     scheduler.add_job(
         func=getNotice,
         trigger="interval",
-        minutes=5,
+        minutes=10,
         next_run_time=datetime.utcnow(),
         id="notice_scrapper",
         replace_existing=True,
