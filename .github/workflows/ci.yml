@@ -44,4 +44,4 @@ jobs:
 
       - name: Run MyPy
         working-directory: ./notice_watch_backend
-        run: uv run mypy app --ignore-missing-imports
+        run: uv run mypy app --ignore-missing-imports 
