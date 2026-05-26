@@ -28,4 +28,4 @@ def start_scheduler():
     )
 
     scheduler.start()
-    print("Notice scraper scheduler started")
+    print("Notice scraper scheduler started....")
