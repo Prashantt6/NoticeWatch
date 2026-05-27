@@ -31,5 +31,5 @@ def update_version(db: Session):
         update(NoticeVersion)
         .values(version=NoticeVersion.version + 1)
     )
-
+    db.commit()
 
