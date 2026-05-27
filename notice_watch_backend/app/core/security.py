@@ -8,5 +8,3 @@ def hash_notice(notice: dict):
     encoded_string = notice_strings.encode("utf-8")
 
     return hashlib.sha256(encoded_string).hexdigest()
-
-

@@ -5,10 +5,9 @@ from sqlalchemy.orm import Session
 
 router = APIRouter()
 
+
 @router.get("/version")
-def notice_version(
-    db: Session = Depends(get_db)
-):
+def notice_version(db: Session = Depends(get_db)):
     version_row = db.query(NoticeVersion).first()
     if not version_row:
         return {"notice_version": 0}

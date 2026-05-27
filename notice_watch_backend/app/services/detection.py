@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.db.models import Notice,NoticeVersion
+from app.db.models import Notice, NoticeVersion
 from app.core.security import hash_notice
 from sqlalchemy import update
 
@@ -27,9 +27,5 @@ def checkChange(db: Session, notice: dict) -> bool:
 
 def update_version(db: Session):
 
-    db.execute(
-        update(NoticeVersion)
-        .values(version=NoticeVersion.version + 1)
-    )
+    db.execute(update(NoticeVersion).values(version=NoticeVersion.version + 1))
     db.commit()
-

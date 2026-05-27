@@ -23,7 +23,8 @@ class DeviceToken(Base):
     id = Column(Integer, primary_key=True)
     token = Column(String, unique=True, nullable=False)
 
+
 class NoticeVersion(Base):
     __tablename__ = "noticeversion"
     id = Column(Integer, primary_key=True)
-    version = Column(Integer, nullable=False, default=0)    
+    version = Column(Integer, nullable=False, default=0)
