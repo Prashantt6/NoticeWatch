@@ -5,10 +5,12 @@ from app.api.devicetokens import router as device_token_router
 from app.scheduler.notice_scheduler import start_scheduler
 from app.firebase.firebase import initialize_firebase
 from app.db.database import Base, engine
+from app.api.noticeversion import router as notice_version_router
 
 app = FastAPI()
 app.include_router(notice_router, prefix="/api/notices", tags=["Notices"])
 app.include_router(device_token_router, prefix="/api/device", tags=["Device Token"])
+app.include_router(notice_version_router, prefix="/api", tags=["Notice Version"])
 
 app.add_middleware(
     CORSMiddleware,

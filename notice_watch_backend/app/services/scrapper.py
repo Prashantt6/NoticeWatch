@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from app.db.database import SessionLocal
-from app.services.detection import checkChange
+from app.services.detection import checkChange, update_version
 from app.notifier.firebasenotifier import send_notification
 
 URL = "https://exam.ioe.tu.edu.np/notices"  # Notice page url
@@ -58,7 +58,7 @@ def getNotice():
 
                 if is_new:
                     print("New Notice Detected", notice_data["title"])
-
+                    update_version(db)
                     send_notification(db, notice_data["title"])
 
             except Exception as e:

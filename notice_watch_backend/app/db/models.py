@@ -17,15 +17,13 @@ class Notice(Base):
     content_hash = Column(String, nullable=False, unique=True, index=True)
 
 
-class Page_hash(Base):
-    __tablename__ = "pagehash"
-
-    id = Column(Integer, primary_key=True, index=True)
-    page_hash = Column(String, unique=True, index=True)
-
-
 class DeviceToken(Base):
     __tablename__ = "device_tokens"
 
     id = Column(Integer, primary_key=True)
     token = Column(String, unique=True, nullable=False)
+
+class NoticeVersion(Base):
+    __tablename__ = "noticeversion"
+    id = Column(Integer, primary_key=True)
+    version = Column(Integer, nullable=False, default=0)    
