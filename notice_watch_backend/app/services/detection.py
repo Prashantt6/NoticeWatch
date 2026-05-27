@@ -1,10 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-
-from app.db.models import Notice
-from app.db.models import Page_hash
-from app.core.security import hash_page
+from app.db.models import Notice, NoticeVersion
 from app.core.security import hash_notice
+from sqlalchemy import update
 
 
 def checkChange(db: Session, notice: dict) -> bool:
@@ -13,7 +11,6 @@ def checkChange(db: Session, notice: dict) -> bool:
     new_notice = Notice(
         title=notice["title"],
         pdf_link=notice["pdf"],
-        # view_link= notice["view"],
         published_date=notice["date"],
         content_hash=content_hash,
     )
@@ -28,31 +25,7 @@ def checkChange(db: Session, notice: dict) -> bool:
         return False
 
 
-def store_hash_code(db: Session):
-    hashed_value = send_hash_code(db)
-    try:
-        page = db.query(Page_hash).first()
+def update_version(db: Session):
 
-        if page is None:
-            page = Page_hash(page_hash=hashed_value)
-            db.add(page)
-
-        else:
-            page.page_hash = hashed_value
-        db.commit()
-
-    except IntegrityError:
-        db.rollback()
-
-
-def send_hash_code(db: Session):
-    rows = (
-        db.query(Notice.content_hash)
-        .order_by(Notice.created_at.desc(), Notice.id.desc())
-        .all()
-    )
-    hashes = [row[0] for row in rows]
-
-    hashed_value = hash_page(hashes)
-
-    return hashed_value
+    db.execute(update(NoticeVersion).values(version=NoticeVersion.version + 1))
+    db.commit()

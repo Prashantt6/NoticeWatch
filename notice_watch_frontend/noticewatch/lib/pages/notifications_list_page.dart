@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:noticewatch/notice_refresh_hub.dart';
 import 'package:noticewatch/notification_card.dart';
 import 'package:noticewatch/notice.dart';
-import 'package:noticewatch/repository.dart';
+import 'package:noticewatch/repositories/notice_repository.dart';
+import 'package:noticewatch/services/sync_manager.dart';
+import 'package:noticewatch/services/api_service.dart';
+import 'package:noticewatch/services/local_cache_service.dart';
+import 'dart:async';
+import 'package:flutter/scheduler.dart';
 
 const Color _scaffoldBg = Color(0xFF0F172A);
 const Color _cardBg = Color(0xFF1E293B);
@@ -15,12 +20,22 @@ class NotificationPage extends StatefulWidget {
   State<NotificationPage> createState() => _NotificationPageState();
 }
 
-class _NotificationPageState extends State<NotificationPage> {
+class _NotificationPageState extends State<NotificationPage> with WidgetsBindingObserver {
   List<Notice>? notices;
   bool _isLoading = false;
   String? _error;
   final TextEditingController _searchController = TextEditingController();
-  final NoticeService _service = NoticeService();
+  // Track last applied cache identity to avoid redundant UI updates.
+  int? _lastAppliedVersion;
+  String? _lastAppliedRawHash;
+  // Use the shared repository instance used by SyncManager so cache/version
+  // are consistent across the app.
+  final NoticeRepository _repo = NoticeRepository.instance;
+  // Debounce timer to coalesce rapid RefreshHub notifications.
+  Timer? _refreshDebounceTimer;
+  static const Duration _refreshDebounceDuration = Duration(milliseconds: 400);
+  // Generation counter to avoid stale async cache loads overwriting newer data.
+  int _cacheLoadGeneration = 0;
 
   List<Notice> _noticesMatchingSearch() {
     final list = notices;
@@ -40,35 +55,88 @@ class _NotificationPageState extends State<NotificationPage> {
     }).toList();
   }
 
-  void _applyNotices(List<Notice> list) {
+  void _applyNotices(List<Notice> list, {int? version, String? raw}) {
     if (!mounted) return;
     setState(() {
       notices = list;
       _isLoading = false;
       _error = null;
+      // Update tracking info for future freshness checks.
+      if (version != null) {
+        _lastAppliedVersion = version;
+        _lastAppliedRawHash = null;
+      } else if (raw != null) {
+        _lastAppliedRawHash = raw;
+        _lastAppliedVersion = null;
+      } else {
+        // If neither provided, clear previous tracking to be safe.
+        _lastAppliedVersion = null;
+        _lastAppliedRawHash = null;
+      }
     });
   }
 
   /// Load from disk only (no API).
   Future<void> _loadFromCache() async {
-    final cached = await _service.loadCachedNotices();
+    final generation = ++_cacheLoadGeneration;
+    final cached = await _repo.getCachedNotices();
+    if (generation != _cacheLoadGeneration) return; // newer load started
     if (cached == null) return;
-    _applyNotices(_mapNotices(cached));
+
+    // Check cached version first when available to decide whether to update UI.
+    final cachedVersion = await _repo.getCachedVersion();
+    if (generation != _cacheLoadGeneration) return;
+    if (cachedVersion != null) {
+      if (cachedVersion == _lastAppliedVersion) return; // already applied
+      _applyNotices(_mapNotices(cached), version: cachedVersion);
+      return;
+    }
+
+    // Fallback to raw JSON hash comparison when version is not present.
+    final raw = await _repo.cache.getCachedRaw();
+    if (generation != _cacheLoadGeneration) return;
+    if (raw != null && raw == _lastAppliedRawHash) return;
+    _applyNotices(_mapNotices(cached), raw: raw);
   }
 
   /// [fromNetwork] true → call API, update UI, save cache.
   /// false → use cache if present; otherwise fetch (first install).
-  Future<void> loadNotices({required bool fromNetwork}) async {
+  Future<void> loadNotices({required bool fromNetwork, bool forceApply = false}) async {
     if (fromNetwork) {
+      final myGeneration = ++_cacheLoadGeneration;
       setState(() {
         _isLoading = notices == null;
         _error = null;
       });
 
       try {
-        final remote = await _service.getData();
-        await _service.saveNoticesCache(remote);
-        _applyNotices(_mapNotices(remote));
+        // Route manual refresh through centralized SyncManager to avoid
+        // duplicate fetches and overlapping network calls.
+        final res = await SyncManager.instance.requestSync(source: SyncSource.manual);
+        // After the sync completes (or joined), apply cache to UI. Manual
+        // refreshes should force UI update when requested.
+        // If a newer load started meanwhile, abort applying this result.
+        final remote = await _repo.getCachedNotices();
+        if (myGeneration != _cacheLoadGeneration) return;
+        if (remote != null) {
+          if (forceApply) {
+            final cachedVersion = await _repo.getCachedVersion();
+            final raw = await _repo.cache.getCachedRaw();
+            _applyNotices(_mapNotices(remote), version: cachedVersion, raw: raw);
+          } else {
+            final cachedVersion = await _repo.getCachedVersion();
+            if (cachedVersion != null) {
+              if (cachedVersion != _lastAppliedVersion) {
+                _applyNotices(_mapNotices(remote), version: cachedVersion);
+              }
+            } else {
+              final raw = await _repo.cache.getCachedRaw();
+              if (raw == null || raw != _lastAppliedRawHash) {
+                _applyNotices(_mapNotices(remote), raw: raw);
+              }
+            }
+          }
+        }
       } catch (e) {
         if (!mounted) return;
         setState(() {
@@ -80,7 +148,7 @@ class _NotificationPageState extends State<NotificationPage> {
       return;
     }
 
-    final hasCache = await _service.hasNoticesCache();
+    final hasCache = await _repo.hasCache();
     if (hasCache) {
       await _loadFromCache();
       return;
@@ -92,20 +160,42 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   void dispose() {
     NoticeRefreshHub.instance.removeListener(_onRefreshRequested);
+    _refreshDebounceTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
   }
 
   /// FCM handler already fetched and saved cache; reload UI from disk only.
   void _onRefreshRequested() {
-    _loadFromCache();
+    // Debounce rapid refresh notifications to avoid repeated cache reloads.
+    _refreshDebounceTimer?.cancel();
+    _refreshDebounceTimer = Timer(_refreshDebounceDuration, () {
+      _loadFromCache();
+    });
   }
 
   @override
   void initState() {
     super.initState();
     NoticeRefreshHub.instance.addListener(_onRefreshRequested);
+    // Instant: show cached notices immediately, then trigger a lightweight
+    // background sync that will update the cache/UI only if needed.
     loadNotices(fromNetwork: false);
+    // Startup sync (debounced inside SyncManager)
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      SyncManager.instance.requestSync(source: SyncSource.startup);
+    });
+    // Listen for app resume to trigger a debounced sync.
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Debounced inside SyncManager
+      SyncManager.instance.requestSync(source: SyncSource.resume);
+    }
   }
 
   Widget _buildSearchBar() {
@@ -265,7 +355,7 @@ class _NotificationPageState extends State<NotificationPage> {
         color: Colors.amber,
         backgroundColor: _cardBg,
         displacement: 48,
-        onRefresh: () => loadNotices(fromNetwork: true),
+        onRefresh: () => loadNotices(fromNetwork: true, forceApply: true),
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
@@ -274,9 +364,11 @@ class _NotificationPageState extends State<NotificationPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => loadNotices(fromNetwork: true),
+        onPressed: () => loadNotices(fromNetwork: true, forceApply: true),
         child: const Icon(Icons.refresh),
       ),
     );
   }
 }
+
+

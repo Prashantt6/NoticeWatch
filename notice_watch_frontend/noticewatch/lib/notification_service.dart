@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
 import 'package:noticewatch/notice_refresh_hub.dart';
-import 'package:noticewatch/repository.dart';
+import 'package:noticewatch/services/sync_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Last FCM token successfully registered with the backend.
@@ -122,29 +122,22 @@ class NotificationService {
         message.data['title'] ?? message.notification?.title;
     final body =
         message.data['body'] ?? message.notification?.body;
-    if ((title != null && title.toString().isNotEmpty) ||
-        (body != null && body.toString().isNotEmpty)) {
+    // Show local notification only when the platform did not already
+    // provide a notification (avoid duplicates when backend sends both
+    // notification and data payloads).
+    if (message.notification == null &&
+        ((title != null && title.toString().isNotEmpty) ||
+            (body != null && body.toString().isNotEmpty))) {
       await showNotification(
         title: title?.toString(),
         body: body?.toString(),
       );
     }
-    await _refreshNoticesAfterPush();
-  }
 
-  /// FCM means backend has new data — fetch once and update local cache.
-  Future<void> _refreshNoticesAfterPush() async {
-    try {
-      final service = NoticeService();
-      final remote = await service.getData();
-      await service.saveNoticesCache(remote);
-      NoticeRefreshHub.instance.requestFetch();
-    } catch (e, st) {
-      if (kDebugMode) {
-        debugPrint('Notice cache refresh after push failed: $e\n$st');
-      }
-    }
+    // Trigger a lightweight version check + fetch-if-needed.
+    await SyncManager.instance.requestSync(source: SyncSource.fcm);
   }
+  
 
   NotificationDetails getNotificationDetails() {
     return const NotificationDetails(

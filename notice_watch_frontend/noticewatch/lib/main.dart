@@ -3,7 +3,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:noticewatch/pages/notifications_list_page.dart';
 import 'package:noticewatch/pages/notice_page.dart';
 import 'package:noticewatch/notification_service.dart';
-import 'package:noticewatch/repository.dart';
+import 'package:noticewatch/repositories/notice_repository.dart';
+import 'package:noticewatch/services/api_service.dart';
+import 'package:noticewatch/services/local_cache_service.dart';
+import 'package:noticewatch/services/sync_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -17,6 +20,8 @@ Map<String, WidgetBuilder> routes = {
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Ensure environment variables are available in the background isolate.
+  await dotenv.load(fileName: '.env');
   await Firebase.initializeApp();
 
   final notificationService = NotificationService();
@@ -27,15 +32,20 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       message.data['title'] ?? notification?.title ?? 'NoticeWatch';
   final body =
       message.data['body'] ?? notification?.body ?? '';
-  await notificationService.showNotification(
-    title: title,
-    body: body,
-  );
+  // Show local notification only if platform did not already present one.
+  if (message.notification == null &&
+      ((title != null && title.toString().isNotEmpty) ||
+          (body != null && body.toString().isNotEmpty))) {
+    await notificationService.showNotification(
+      title: title,
+      body: body,
+    );
+  }
 
   try {
-    final service = NoticeService();
-    final remote = await service.getData();
-    await service.saveNoticesCache(remote);
+    // Delegate to SyncManager so all sync logic, cooldowns and cache writes
+    // remain centralized and consistent with foreground behavior.
+    await SyncManager.instance.requestSync(source: SyncSource.fcmBackground);
   } catch (_) {}
 }
 
