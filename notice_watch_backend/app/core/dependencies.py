@@ -2,9 +2,11 @@ from fastapi import Depends, HTTPException
 from app.db.models import Users
 from fastapi.security import OAuth2PasswordBearer
 from app.api.auth import supabase
+from app.db.database import get_db
+from sqlalchemy.orm import Session
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="login"
+    tokenUrl="api/login"
 )
 
 def get_current_user(
@@ -26,10 +28,24 @@ def get_current_user(
         )
     
 
-def get_admin(user: Users = Depends(get_current_user)):
-    if not user.is_admin:
+def get_admin(
+    auth_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+    ):
+
+    print(auth_user.id)
+    user = db.query(Users).filter(
+        Users.id == auth_user.id
+    ).first()
+
+    if not user:
         raise HTTPException(
-            status_code=401,
+            status_code=404,
+            detail="User not found"
+        )  
+    if  user.is_admin != True:
+        raise HTTPException(
+            status_code=403,
             detail="Unauthorized action"
         )
     

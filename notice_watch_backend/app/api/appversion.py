@@ -15,7 +15,7 @@ class AppReleaseSchema(BaseModel):
 
 
 @router.get("/app-version")
-def get_latest_version(db: Session = Depends(get_db)):
+def get_latest_version(db: Session = Depends(get_db)) -> AppReleaseSchema:
 
     latest = db.query(AppVersion).order_by(AppVersion.version_code.desc()).first()
 

@@ -41,6 +41,6 @@ class AppVersion(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class Users(Base):
-    __tablename__= "user"
+    __tablename__= "users"
     id = Column(UUID, primary_key=True)
     is_admin = Column(Boolean, default=False)

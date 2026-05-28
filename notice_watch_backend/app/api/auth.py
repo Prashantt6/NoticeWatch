@@ -1,7 +1,8 @@
 import os
 from typing import Any
 from supabase import create_client
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException,Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -20,11 +21,13 @@ supabase = create_client(
 router = APIRouter()
 
 @router.post("/login")
-def login(email:str, password:str):
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends()
+):
     try:
         response = supabase.auth.sign_in_with_password({
-            "email": email,
-            "password": password
+            "email": form_data.username,
+            "password": form_data.password
         })
 
         # response.session may be None; guard before accessing attributes
