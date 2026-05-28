@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime,Boolean,UUID
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, UUID
 from sqlalchemy.sql import func
 from app.db.database import Base
 
@@ -40,7 +40,8 @@ class AppVersion(Base):
     force_update = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+
 class Users(Base):
-    __tablename__= "users"
+    __tablename__ = "users"
     id = Column(UUID, primary_key=True)
     is_admin = Column(Boolean, default=False)

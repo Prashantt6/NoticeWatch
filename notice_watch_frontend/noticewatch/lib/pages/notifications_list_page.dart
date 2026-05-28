@@ -4,10 +4,10 @@ import 'package:noticewatch/notification_card.dart';
 import 'package:noticewatch/notice.dart';
 import 'package:noticewatch/repositories/notice_repository.dart';
 import 'package:noticewatch/services/sync_manager.dart';
-import 'package:noticewatch/services/api_service.dart';
-import 'package:noticewatch/services/local_cache_service.dart';
 import 'dart:async';
 import 'package:flutter/scheduler.dart';
+import 'package:noticewatch/services/update_service.dart';
+import 'package:noticewatch/core/update_dialog.dart';
 
 const Color _scaffoldBg = Color(0xFF0F172A);
 const Color _cardBg = Color(0xFF1E293B);
@@ -36,6 +36,9 @@ class _NotificationPageState extends State<NotificationPage> with WidgetsBinding
   static const Duration _refreshDebounceDuration = Duration(milliseconds: 400);
   // Generation counter to avoid stale async cache loads overwriting newer data.
   int _cacheLoadGeneration = 0;
+  // Ensure update dialog is shown at most once per app start.
+  bool _updateDialogShown = false;
+  
 
   List<Notice> _noticesMatchingSearch() {
     final list = notices;
@@ -185,10 +188,30 @@ class _NotificationPageState extends State<NotificationPage> with WidgetsBinding
     // Startup sync (debounced inside SyncManager)
     SchedulerBinding.instance.addPostFrameCallback((_) {
       SyncManager.instance.requestSync(source: SyncSource.startup);
+      // Kick off a non-blocking update check after first frame.
+      _checkForUpdate();
     });
     // Listen for app resume to trigger a debounced sync.
     WidgetsBinding.instance.addObserver(this);
   }
+
+  /// Check for app updates once after startup.
+  /// Non-blocking and shows the update dialog (once) if a newer release exists.
+  Future<void> _checkForUpdate() async {
+    if (_updateDialogShown) return;
+    try {
+      final release = await UpdateService().checkForUpdate();
+      if (!mounted) return;
+      if (release != null && !_updateDialogShown) {
+        _updateDialogShown = true;
+        await showUpdateDialog(context, release);
+      }
+    } catch (e, st) {
+      debugPrint('Update check failed: $e\n$st');
+    }
+  }
+
+  
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
