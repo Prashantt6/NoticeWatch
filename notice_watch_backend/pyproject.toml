@@ -19,6 +19,7 @@ dependencies = [
     "schedule==1.2.2",
     "sqlalchemy==2.0.46",
     "sqlmodel>=0.0.38",
+    "supabase>=2.30.0",
     "uvicorn==0.40.0",
 ]
 [tool.mypy]
