@@ -218,6 +218,14 @@ class _NotificationPageState extends State<NotificationPage> with WidgetsBinding
     if (state == AppLifecycleState.resumed) {
       // Debounced inside SyncManager
       SyncManager.instance.requestSync(source: SyncSource.resume);
+      // When app returns to foreground, allow update dialog to be shown
+      // again for this new session and perform a fresh check.
+      _updateDialogShown = false;
+      _checkForUpdate();
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      // When leaving foreground, reset the shown flag so a future resume
+      // can trigger the dialog again.
+      _updateDialogShown = false;
     }
   }
 

@@ -78,7 +78,7 @@ def getNotice():
 def awakeRender():
     try:
         res1 = requests.get(
-            "https://noticewatch.onrender.com/api/notices", headers=HEADERS, timeout=10
+            "https://noticewatch.onrender.com/api/version", headers=HEADERS, timeout=10
         )
         if res1.status_code == 200:
             print("Render awaked")
