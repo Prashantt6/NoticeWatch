@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime,Boolean
 from sqlalchemy.sql import func
 from app.db.database import Base
 
@@ -28,3 +28,14 @@ class NoticeVersion(Base):
     __tablename__ = "noticeversion"
     id = Column(Integer, primary_key=True)
     version = Column(Integer, nullable=False, default=0)
+
+
+class AppVersion(Base):
+    __tablename__ = "app_versions"
+    id = Column(Integer, primary_key=True)
+    version_code = Column(Integer, nullable=False)
+    version_name = Column(String, nullable=False)
+    apk_url = Column(String, nullable=False)
+    changelog = Column(String)
+    force_update = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
