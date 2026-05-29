@@ -4,6 +4,7 @@ from app.db.database import get_db
 from sqlalchemy.orm import Session
 from app.core.dependencies import get_admin
 from pydantic import BaseModel, ConfigDict
+from firebase_admin import messaging
 
 router = APIRouter()
 
@@ -48,3 +49,21 @@ def release_notice(
     db.refresh(new_release)
 
     return AppReleaseSchema.from_orm(new_release)
+
+
+@router.post("/test-notification")
+def test_notification(
+    device_token: str,
+    admin: Users = Depends(get_admin),
+):
+
+    messaging.send(
+        messaging.Message(
+            token=device_token,
+            notification=messaging.Notification(
+                title="Test", body="Testing NoticeWatch"
+            ),
+        )
+    )
+
+    return {"message": "Notifcation sent"}

@@ -125,9 +125,9 @@ class NotificationService {
     // Show local notification only when the platform did not already
     // provide a notification (avoid duplicates when backend sends both
     // notification and data payloads).
-    if (message.notification == null &&
+    if 
         ((title != null && title.toString().isNotEmpty) ||
-            (body != null && body.toString().isNotEmpty))) {
+            (body != null && body.toString().isNotEmpty)) {
       await showNotification(
         title: title?.toString(),
         body: body?.toString(),
