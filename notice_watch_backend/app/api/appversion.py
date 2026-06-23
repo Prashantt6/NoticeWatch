@@ -57,13 +57,16 @@ def test_notification(
     admin: Users = Depends(get_admin),
 ):
 
-    messaging.send(
-        messaging.Message(
-            token=device_token,
-            notification=messaging.Notification(
-                title="Test", body="Testing NoticeWatch"
-            ),
+    try:
+        messaging.send(
+            messaging.Message(
+                token=device_token,
+                notification=messaging.Notification(
+                    title="Test", body="Testing NoticeWatch"
+                ),
+            )
         )
-    )
+    except messaging.UnregisteredError:
+        raise HTTPException(status_code=410, detail="Device token is no longer valid")
 
     return {"message": "Notifcation sent"}
